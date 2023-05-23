@@ -5,6 +5,7 @@ import { AuthController } from "./auth.controller";
 import { AuthDto } from "./dto";
 import * as argon from 'argon2'
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError, PrismaClientValidationError } from "@prisma/client/runtime";
+import { async } from "rxjs";
 
 @Injectable()
 
@@ -46,8 +47,31 @@ catch (error) {
 
 }    
 
-signin(dto: AuthDto){
-    return {msg: 'Signed in'}
+async signin(dto: AuthDto){
+
+const user = await this.prisma.user.findUnique({
+    where:{
+        email: dto.email
+    }
+})
+
+if (!user) {
+
+    throw new ForbiddenException("Credentials incorrect")
+    
+}
+
+const pwMatches = await argon.verify(user.hash,dto.password)
+
+if(!pwMatches){
+    throw new ForbiddenException("Credentials incorrect")
+}
+
+
+delete user.hash;
+
+
+    return user;
 }
 
 
