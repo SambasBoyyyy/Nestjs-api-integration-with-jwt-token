@@ -87,7 +87,7 @@ if(!pwMatches){
     };
 
     const token = await this.jwt.signAsync(payload,{
-        expiresIn: '15m',
+        expiresIn: '150m',
         secret: this.config.get('JWT_SECRET')
         
     })
